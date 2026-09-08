@@ -1,0 +1,3 @@
+[build]
+  command = "rm -rf dist && mkdir dist && unzip -q aceapp-site.zip -d dist"
+  publish = "dist"
