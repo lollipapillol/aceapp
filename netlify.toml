@@ -1,3 +1,7 @@
 [build]
-  command = "rm -rf dist && mkdir dist && unzip -q aceapp-site.zip -d dist"
+  command = "rm -rf dist .aceapp-unpack netlify/functions && mkdir -p dist .aceapp-unpack netlify/functions && unzip -q aceapp-site.zip -d .aceapp-unpack && cp -R .aceapp-unpack/. dist/ && rm -rf dist/netlify && cp -R .aceapp-unpack/netlify/functions/. netlify/functions/"
   publish = "dist"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
