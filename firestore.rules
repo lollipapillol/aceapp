@@ -1,0 +1,30 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId} {
+      function ownsDocument() {
+        return request.auth != null && request.auth.uid == userId;
+      }
+
+      function isAnonymous() {
+        return request.auth.token.firebase.sign_in_provider == 'anonymous';
+      }
+
+      function trialInRange() {
+        return request.resource.data.trialUsed is int
+          && request.resource.data.trialUsed >= 0
+          && request.resource.data.trialUsed <= 20;
+      }
+
+      allow read: if ownsDocument();
+      allow create: if ownsDocument() && (!isAnonymous() || trialInRange());
+      allow update: if ownsDocument()
+        && (!isAnonymous()
+            || (trialInRange()
+                && request.resource.data.trialUsed >= resource.data.trialUsed));
+      // Anonymous guests cannot delete/recreate their own Firestore document to
+      // reset the server-side trial counter for the same Firebase UID.
+      allow delete: if ownsDocument() && !isAnonymous();
+    }
+  }
+}
