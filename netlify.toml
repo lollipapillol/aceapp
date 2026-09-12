@@ -1,5 +1,5 @@
 [build]
-  command = "rm -rf dist .aceapp-unpack netlify/functions && mkdir -p dist .aceapp-unpack netlify/functions && unzip -q aceapp-site.zip -d .aceapp-unpack && cp -R .aceapp-unpack/. dist/ && rm -rf dist/netlify && cp -R .aceapp-unpack/netlify/functions/. netlify/functions/"
+  command = "rm -rf dist .aceapp-unpack netlify/functions && mkdir -p dist .aceapp-unpack netlify/functions && unzip -q aceapp-site.zip -d .aceapp-unpack && test -f .aceapp-unpack/index.html && cp -R .aceapp-unpack/. dist/ && rm -rf dist/netlify && cp -R .aceapp-unpack/netlify/functions/. netlify/functions/"
   publish = "dist"
 
 [functions]
