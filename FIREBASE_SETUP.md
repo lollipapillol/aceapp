@@ -1,45 +1,43 @@
 # Aceapp Firebase setup
 
-The web build is already wired to Firebase project `aceapp-70837` using the Firebase modular browser SDK.
+Aceapp is wired to Firebase project `aceapp-70837` with Firebase Authentication and Cloud Firestore.
 
-## Firebase Console steps required
+## Firebase Console steps
 
 1. **Authentication → Sign-in method**
-   - Enable **Anonymous**.
-   - Enable **Email/Password** (the Email/Password provider, not email-link-only).
+   - Enable **Email/Password**.
+   - Keep **Anonymous authentication disabled**. Guests do not create Firebase users.
 2. **Firestore Database**
-   - Create a Firestore database if the project does not have one yet.
-   - Start in Production mode.
-   - Replace the Firestore rules with the included `firestore.rules` and publish them.
+   - Create the database in Production mode if it does not exist.
+   - Publish the included `firestore.rules`.
 3. **Authentication → Settings → Authorized domains**
-   - Add the domain where Aceapp is deployed if Firebase has not added it automatically.
-4. Optional but recommended before a larger public launch:
+   - Add every deployed Aceapp domain, including the Netlify domain and any custom domain.
+4. Recommended before a larger public launch:
    - Enable Firebase App Check for the deployed web domain.
-   - If available on your Firebase/Identity Platform setup, enable automatic cleanup of old anonymous accounts.
+   - Consider email verification if verified-account-only features are introduced later.
 
-## Current behavior
+## Current access model
 
-- First visit: Firebase creates an anonymous user.
-- Guests receive 20 scored retrievals. The included Firestore rules keep an anonymous UID's cloud trial counter within 0–20 and prevent it from being decreased or deleted by that anonymous user.
-- Guest study progress is synced to `users/{uid}` in Firestore when available and is also cached locally for offline resilience.
-- Create account: the anonymous Firebase user is linked to Email/Password, preserving the same UID and progress.
-- Log in to an existing account: local guest progress and the user's Firestore progress are merged conservatively.
-- Signed-in users are not subject to the 20-retrieval gate.
-- Sign out clears that user's study record from the local UI and starts a new guest session; the registered record remains in Firestore.
+- A guest can use exactly one fixed showcase set: **Cardiovascular → Heart, Anterior View**.
+- The showcase demonstrates the full Aceapp loop: learn → name → reverse location → repair → mini-boss.
+- Clearing browser storage can replay that same showcase, but cannot unlock a different free session or expose protected systems.
+- Foundations, Atlas, Stats, Practice, tests, all other anatomy sets, and cloud-saved progress require account creation/login.
+- Firebase Authentication begins only when a person creates an account or logs in. This keeps the Firebase Authentication user list much closer to the number of real Aceapp accounts.
+- When a guest creates an account, local showcase progress can be merged into the new registered record and then synced to Firestore.
+- Signing out removes signed-in progress from the local UI while the registered cloud record remains in Firestore.
 
-## Data model
+## User document
 
-`users/{firebaseUid}` stores:
-- `accountType`: `anonymous` or `registered`
+`users/{firebaseUid}` stores fields such as:
+- `accountType: "registered"`
 - `email`
 - `displayName`
-- `trialUsed`
 - `schemaVersion`
 - `progress`: XP, streak, mastery, misses, seen items, reviews, activity days, confusion pairs, and skill evidence
 - `updatedAt`
 
-Cloud writes are debounced so a rapid drill does not send a Firestore write for every tap.
+Cloud writes are debounced so drills do not create a Firestore write on every tap.
 
 ## Security note
 
-The Firebase web configuration/API key in `index.html` is expected to be public. Do not place Firebase Admin service-account keys, private API credentials, or payment secrets in the web app. Access to user records is controlled by Firebase Authentication and Firestore Security Rules.
+The Firebase web configuration/API key in `index.html` is public client configuration by design. Never place Firebase Admin service-account credentials or other private server credentials in the browser bundle. User records are protected by Firebase Authentication and Firestore Security Rules.

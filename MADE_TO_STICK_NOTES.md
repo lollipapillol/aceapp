@@ -1,18 +1,26 @@
 # Aceapp — Made to Stick learning pass
 
-Applied principles from Chip & Dan Heath's SUCCESs framework selectively, without forcing a gimmick onto every structure.
+Aceapp applies Chip & Dan Heath's SUCCESs framework selectively. A structure does **not** receive a mnemonic merely because there is space for one.
 
-- Simple: Learn cards visually prioritize one core sentence; secondary detail is quieter.
-- Unexpected: selected structures surface a counter-intuitive contrast only when it is genuinely useful.
-- Concrete: selected structures use visual/spatial anchors tied directly to the atlas image.
-- Credible: teaching cues stay anatomy-specific and avoid fabricated trivia or pseudo-mnemonics.
-- Emotional: a small number of clinically meaningful structures explain why identification matters.
-- Stories: a few structures use one-sentence micro-scenarios where a scenario improves recall.
+- **Simple:** Learn cards prioritize one core anatomical fact before secondary detail.
+- **Unexpected:** selected structures surface a counter-intuitive contrast only when it is genuinely useful.
+- **Concrete:** visual/spatial anchors are tied directly to what the learner can see on the plate.
+- **Credible:** cues stay anatomy-specific and avoid fabricated etymologies, trivia, or pseudo-mnemonics.
+- **Emotional/relevant:** selected clinically meaningful structures explain why identification matters.
+- **Stories:** short micro-scenarios are used only when a scenario makes retrieval easier.
 
 ## Mnemonic rule
-The Memory hook box is now conditional. If Aceapp cannot find a real, concise mnemonic or memory device, the box does not render. The previous generic "point, say, look away" fallback has been removed.
 
-## QA
-- JavaScript module syntax: passed (`node --check`).
-- Anatomy region/diagram option consistency: 450 checked, 0 mismatches (4 intentionally special/nonstandard activities skipped by that checker).
-- Firebase configuration retained.
+The **Memory hook** box is conditional. If Aceapp does not have a concise, genuinely useful mnemonic or memory device, the box does not render. The old generic fallback has been removed.
+
+## Product-level application
+
+The guest preview now uses **Heart, Anterior View** rather than a basic terminology lesson. The goal is to demonstrate Aceapp's most memorable behavior immediately: seeing real anatomy, identifying it, locating it in reverse, repairing a miss, and completing a mini-boss. This is a concrete demonstration of what the learner becomes able to do, not a feature tour.
+
+## QA status
+
+- JavaScript module syntax: checked with `node --check`.
+- Plate geometry: 52 mapped plate views and 516 annotation shapes/targets pass bounds validation with 0 out-of-bounds targets.
+- Image-space integrity: 58 declared plate descriptors match the native source image dimensions exactly; no coordinate system is being stretched to a different intrinsic size.
+- The intentionally held Hand Surface & Side Terms activity remains excluded from release.
+- Firebase configuration retained; anonymous guest authentication is not used.
