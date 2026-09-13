@@ -1,4 +1,4 @@
-name: Unpack and deploy Aceapp
+name: Unpack and deploy Aceapp — Made to Stick
 
 on:
   workflow_dispatch:
@@ -22,32 +22,49 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Find Aceapp ZIP
+      - name: Verify Made-to-Stick ZIP
         shell: bash
         run: |
-          ZIP_FILE="$(find . -maxdepth 1 -type f -name 'aceapp-site*.zip' | head -n 1)"
-          if [ -z "$ZIP_FILE" ]; then
-            echo "No Aceapp ZIP found in the repository root."
+          ZIP_FILE="./aceapp-site-firebase-made-to-stick.zip"
+          if [ ! -f "$ZIP_FILE" ]; then
+            echo "Required file not found: $ZIP_FILE"
+            echo "Upload aceapp-site-firebase-made-to-stick.zip to the repository root, then run this workflow again."
             exit 1
           fi
           echo "ZIP_FILE=$ZIP_FILE" >> "$GITHUB_ENV"
-          echo "Using $ZIP_FILE"
+          echo "Deploying exactly: $ZIP_FILE"
 
-      - name: Unpack Aceapp into repository root
+      - name: Unpack Made-to-Stick build
         shell: bash
         run: |
           unzip -o "$ZIP_FILE" -d .
           rm -f "$ZIP_FILE"
+
+      - name: Verify Made-to-Stick code is present
+        shell: bash
+        run: |
+          if ! grep -q "Right main bronchus.*Picture this" index.html; then
+            echo "Made-to-Stick verification failed: expected sticky-learning marker not found in index.html"
+            exit 1
+          fi
+
+          if ! grep -q "Use a memory hook only when it genuinely helps" index.html; then
+            echo "Made-to-Stick verification failed: mnemonic policy marker not found in index.html"
+            exit 1
+          fi
+
+          echo "Made-to-Stick verification passed."
 
       - name: Commit unpacked website
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
           git add -A
 
           if ! git diff --cached --quiet; then
-            git commit -m "Unpack Aceapp website"
+            git commit -m "Deploy Aceapp Made-to-Stick build"
             git push
           else
             echo "Nothing changed."
@@ -57,6 +74,7 @@ jobs:
         shell: bash
         run: |
           mkdir -p _site
+
           rsync -a \
             --exclude='.git/' \
             --exclude='.github/' \
@@ -75,6 +93,7 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+
     runs-on: ubuntu-latest
     needs: unpack
 
