@@ -1,3 +1,8 @@
+# Aceapp v49.1 — Startup hotfix
+
+- Fixes React production error #310 by moving the admin effect above the loading-screen early return so hook order never changes between renders.
+- No anatomy coordinates, labels, plate images, Firebase rules, donation flow, or v49 Readiness Matrix behavior changed.
+
 # Aceapp v49 — Readiness Matrix
 
 ## New in v49
@@ -37,11 +42,3 @@ No Firestore rule change is required for v49. The Readiness Matrix is derived fr
 
 ## Cache
 The service-worker cache key and registration query were bumped to v49.
-
-
-## v50 startup hotfix
-- Replaced the React/lucide import-map path with direct version-pinned browser ESM imports.
-- Added a React error boundary so runtime failures show a recovery screen instead of a blank page.
-- Added one-tap service-worker/cache recovery that preserves local learning progress.
-- Hardened readiness-matrix evidence checks against malformed legacy local state.
-- No anatomy data or plate artwork changed.
