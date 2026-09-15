@@ -1,4 +1,4 @@
-name: Update Aceapp from v28 release ZIP
+name: Update Aceapp from v49 Readiness Matrix release ZIP
 
 on:
   workflow_dispatch:
@@ -19,10 +19,10 @@ jobs:
       - name: Verify release ZIP
         shell: bash
         run: |
-          ZIP_FILE="./aceapp-release-v28-private-support.zip"
+          ZIP_FILE="./aceapp-release-v49-readiness-matrix.zip"
           if [ ! -f "$ZIP_FILE" ]; then
             echo "Required file not found: $ZIP_FILE"
-            echo "Upload aceapp-release-v28-private-support.zip to the repository root, then run this workflow again."
+            echo "Upload aceapp-release-v49-readiness-matrix.zip to the repository root, then run this workflow again."
             exit 1
           fi
           echo "ZIP_FILE=$ZIP_FILE" >> "$GITHUB_ENV"
@@ -33,7 +33,6 @@ jobs:
           TMP_DIR="$(mktemp -d)"
           unzip -q "$ZIP_FILE" -d "$TMP_DIR"
 
-          # Remove files/folders from the previous Aceapp release
           rm -rf plates assets netlify
 
           rm -f index.html \
@@ -42,6 +41,7 @@ jobs:
             firestore.rules \
             netlify.toml \
             FIREBASE_SETUP.md \
+            ADMIN_SETUP.md \
             PAYMENTS_SETUP.md \
             SUPPORT_SETUP.md \
             MADE_TO_STICK_NOTES.md \
@@ -49,32 +49,40 @@ jobs:
             DEPLOY_NETLIFY.md \
             RELEASE_NOTES.md
 
-          # Copy the new release into the repository root
           cp -a "$TMP_DIR"/. ./
 
-          # Remove uploaded ZIP after extraction
           rm -f "$ZIP_FILE"
           rm -rf "$TMP_DIR"
 
-      - name: Verify v28 release markers
+      - name: Verify v49 Readiness Matrix release
         shell: bash
         run: |
           test -f index.html
           test -d plates
+          test -f firestore.rules
+          test -f ADMIN_SETUP.md
           test -f assets/bpi-instapay-qr.png
 
-          grep -q "cardio/heart-external" index.html
-          grep -q "Try the Heart Challenge" index.html
-          grep -q "ACE YOUR EXAMS ASAP" index.html
-          grep -q "WHAT YOU CHOSE" index.html
-
+          grep -q "const ACEAPP_RELEASE = 'v49'" index.html
+          grep -q "READINESS MATRIX" index.html
+          grep -q "runItemPrescription" index.html
+          grep -q "Train localization" index.html
+          grep -q "Train free recall" index.html
+          grep -q "Fade the cues" index.html
+          grep -q "Shift the view" index.html
+          grep -q "Reduce context" index.html
+          grep -q "buildCropChallenge" index.html
+          grep -q "buildCueFade" index.html
+          grep -q "buildViewShiftSession" index.html
+          grep -q "Smart Daily Sprint" index.html
+          grep -q "Spotter simulation" index.html
           grep -q "paypal.com/ncp/payment/23PT4EVR3Q34C" index.html
-          grep -q "BPI / InstaPay QR" index.html
-
+          grep -q "aceapp-v49-readiness-matrix" sw.js
+          grep -q "match /admins/{adminId}" firestore.rules
           ! grep -qi "xendit" index.html
           ! grep -qi "gcash" index.html
 
-          echo "Aceapp v28 privacy-first support release verification passed."
+          echo "Aceapp v49 Readiness Matrix release verification passed."
 
       - name: Commit release
         shell: bash
@@ -85,7 +93,7 @@ jobs:
           git add -A
 
           if ! git diff --cached --quiet; then
-            git commit -m "Deploy Aceapp v28 privacy-first support"
+            git commit -m "Deploy Aceapp v49 Readiness Matrix"
             git push
           else
             echo "No changes to commit."
