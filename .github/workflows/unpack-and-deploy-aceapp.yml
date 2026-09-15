@@ -1,4 +1,4 @@
-name: Update Aceapp from v50 Startup Hotfix ZIP
+name: Update Aceapp from v49.1 startup hotfix ZIP
 
 on:
   workflow_dispatch:
@@ -19,21 +19,18 @@ jobs:
       - name: Verify release ZIP
         shell: bash
         run: |
-          ZIP_FILE="./aceapp-release-v50-startup-hotfix.zip"
-
+          ZIP_FILE="./aceapp-release-v49-1-startup-hotfix.zip"
           if [ ! -f "$ZIP_FILE" ]; then
             echo "Required file not found: $ZIP_FILE"
-            echo "Upload aceapp-release-v50-startup-hotfix.zip to the repository root, then run this workflow again."
+            echo "Upload aceapp-release-v49-1-startup-hotfix.zip to the repository root, then run this workflow again."
             exit 1
           fi
-
           echo "ZIP_FILE=$ZIP_FILE" >> "$GITHUB_ENV"
 
-      - name: Replace website files with v50
+      - name: Replace website files with hotfix
         shell: bash
         run: |
           TMP_DIR="$(mktemp -d)"
-
           unzip -q "$ZIP_FILE" -d "$TMP_DIR"
 
           rm -rf plates assets netlify
@@ -57,53 +54,60 @@ jobs:
           rm -f "$ZIP_FILE"
           rm -rf "$TMP_DIR"
 
-      - name: Verify v50 startup hotfix
+      - name: Verify v49.1 startup hotfix
         shell: bash
         run: |
           test -f index.html
-          test -f sw.js
-          test -f firestore.rules
           test -d plates
+          test -f firestore.rules
+          test -f ADMIN_SETUP.md
           test -f assets/bpi-instapay-qr.png
 
-          grep -q "const ACEAPP_RELEASE = 'v50'" index.html
-          grep -q "AceappErrorBoundary" index.html
-          grep -q "Clear app cache & reload" index.html
-          grep -q "esm.unpkg.com/react@18.3.1" index.html
-
+          grep -q "const ACEAPP_RELEASE = 'v49.1'" index.html
           grep -q "READINESS MATRIX" index.html
+          grep -q "Keep every hook above the loading-screen early return" index.html
+          grep -q "aceapp-v49-1-startup-hotfix" sw.js
           grep -q "paypal.com/ncp/payment/23PT4EVR3Q34C" index.html
 
-          grep -q "aceapp-v50-startup-hotfix" sw.js
-
-          ! grep -q "esm.sh/react@18.3.1" index.html
           ! grep -qi "xendit" index.html
           ! grep -qi "gcash" index.html
 
           python - <<'PY'
           from pathlib import Path
-          import re
 
-          s = Path("index.html").read_text()
+          text = Path('index.html').read_text()
 
-          m = re.search(
-              r'<script type="module">\s*(.*?)\s*</script>',
-              s,
-              re.S
+          load_return = text.index('if (!loaded) {')
+
+          hook_tokens = (
+              'useState(',
+              'useEffect(',
+              'useMemo(',
+              'useCallback(',
+              'useRef(',
+              'useReducer('
           )
 
-          if not m:
-              raise SystemExit("Module script not found")
+          after = text[load_return:]
 
-          Path("/tmp/aceapp-module.mjs").write_text(m.group(1))
+          bad = [
+              token
+              for token in hook_tokens
+              if token in after
+          ]
+
+          if bad:
+              raise SystemExit(
+                  f'Hook-order verification failed; '
+                  f'hooks found after loading return: {bad}'
+              )
+
+          print('React hook-order verification passed.')
           PY
 
-          node --check /tmp/aceapp-module.mjs
-          node --check sw.js
+          echo "Aceapp v49.1 startup hotfix verification passed."
 
-          echo "Aceapp v50 startup hotfix verification passed."
-
-      - name: Commit release
+      - name: Commit hotfix
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
@@ -112,7 +116,7 @@ jobs:
           git add -A
 
           if ! git diff --cached --quiet; then
-            git commit -m "Deploy Aceapp v50 startup hotfix"
+            git commit -m "Deploy Aceapp v49.1 startup hotfix"
             git push
           else
             echo "No changes to commit."
