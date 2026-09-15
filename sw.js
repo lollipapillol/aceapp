@@ -1,4 +1,4 @@
-const CACHE = 'aceapp-v28-private-support-20260913';
+const CACHE = 'aceapp-v49-readiness-matrix-20260915';
 const APP_SHELL = ['/', '/manifest.webmanifest'];
 
 self.addEventListener('install', (event) => {

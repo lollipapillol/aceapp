@@ -1,17 +1,39 @@
-# Aceapp v28 — privacy-first support
+# Aceapp v49 — Readiness Matrix
 
-This release keeps the v27 Heart Showcase learning/access model and anatomy QA, while simplifying voluntary support.
+## New in v49
 
-## Support changes
+### One readiness model, made visible
+Aceapp already collects different kinds of learning evidence. v49 consolidates those signals into a per-structure **Readiness Matrix** so learners can see why a structure is or is not ready instead of seeing only one percentage.
 
-- Removed Xendit and its Netlify Function.
-- Removed GCash from the public site.
-- Added PayPal hosted support link.
-- Added BPI / InstaPay QR.
-- The public Support page does **not** display a personal mobile number or full bank-account number.
-- Donations are voluntary, are not verified by Aceapp, and do not unlock features.
-- Support copy explains the two purposes: sister's tuition and creation of more medical learning content.
+The five core exam-readiness signals remain:
 
-## Privacy note
+1. **Name** — recognition from the highlighted target
+2. **Find** — localization from the structure name
+3. **Recall** — free recall without choices
+4. **Delay** — successful retrieval after spacing
+5. **Durable** — sufficient spaced strength
 
-The BPI/InstaPay QR necessarily contains payment-routing information so a banking app can initiate a transfer. Recipient details may be shown by the donor's banking app before confirmation. The website itself avoids printing the raw personal phone/account identifiers.
+The matrix also shows optional transfer evidence when the audited plate genuinely supports it:
+
+- **Cue-free** — successful localization after the target highlight is removed
+- **New view** — correct retrieval across at least two verified views
+- **Tight crop** — correct recall after global image context is reduced
+
+Transfer evidence does not fake eligibility. A dash means that particular structure/plate does not currently support that drill.
+
+### Targeted prescription
+Each priority structure now receives one concrete next action such as **Train localization**, **Train free recall**, **Fade the cues**, **Shift the view**, or **Reduce context**. Tapping the prescription opens the relevant existing drill with that structure prioritized first, then interleaves neighboring material rather than mass-repeating one answer.
+
+### Home summary
+Home now summarizes the learner's largest evidence gaps so the readiness percentage has an explanation behind it. Stats contains the full prioritized matrix.
+
+## Anatomy integrity
+No anatomy labels, coordinates, target geometry, plate dimensions, or artwork changed in v49. The `LABEL_CATEGORIES` anatomy block is byte-identical to v48 and all 68 files under `plates/` are unchanged.
+
+The audited baseline remains **52 mapped plate views / 516 annotation targets**.
+
+## Firebase
+No Firestore rule change is required for v49. The Readiness Matrix is derived from existing progress fields (`mastered`, `reviews`, and `skills`).
+
+## Cache
+The service-worker cache key and registration query were bumped to v49.

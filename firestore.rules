@@ -1,20 +1,107 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    function isRegisteredUser() {
+      return request.auth != null
+        && request.auth.token.firebase.sign_in_provider != 'anonymous';
+    }
+
+    function isAdmin() {
+      return isRegisteredUser()
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+        && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.active == true;
+    }
+
+    function shortString(value, maxLen) {
+      return value is string && value.size() <= maxLen;
+    }
+
+    function validAnnotationReport() {
+      return request.resource.data.keys().hasOnly([
+          'type', 'status', 'uid', 'email', 'displayName',
+          'itemKey', 'structure', 'activity', 'category', 'mode',
+          'reason', 'note', 'reportedRelease',
+          'plateFile', 'plateDimensions', 'targetDescriptor',
+          'createdAt', 'clientCreatedAt', 'source'
+        ])
+        && request.resource.data.keys().hasAll([
+          'type', 'status', 'uid', 'itemKey', 'structure',
+          'reason', 'reportedRelease', 'createdAt', 'source'
+        ])
+        && request.resource.data.type == 'annotation_report'
+        && request.resource.data.status == 'open'
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.source == 'aceapp-web'
+        && request.resource.data.reason in [
+          'pointer_misplaced', 'wrong_name', 'too_imprecise',
+          'image_unclear', 'other'
+        ]
+        && shortString(request.resource.data.email, 180)
+        && shortString(request.resource.data.displayName, 120)
+        && shortString(request.resource.data.itemKey, 240)
+        && shortString(request.resource.data.structure, 160)
+        && shortString(request.resource.data.activity, 160)
+        && shortString(request.resource.data.category, 160)
+        && shortString(request.resource.data.mode, 60)
+        && shortString(request.resource.data.note, 300)
+        && shortString(request.resource.data.reportedRelease, 40)
+        && (!request.resource.data.keys().hasAny(['plateFile']) || shortString(request.resource.data.plateFile, 180))
+        && (!request.resource.data.keys().hasAny(['plateDimensions']) || shortString(request.resource.data.plateDimensions, 40))
+        && (!request.resource.data.keys().hasAny(['targetDescriptor']) || shortString(request.resource.data.targetDescriptor, 700))
+        && shortString(request.resource.data.clientCreatedAt, 40)
+        && request.resource.data.createdAt == request.time;
+    }
+
+    function validSubjectSuggestion() {
+      return request.resource.data.keys().hasOnly([
+          'type', 'status', 'uid', 'email', 'displayName',
+          'subject', 'suggestion', 'createdAt', 'clientCreatedAt', 'source'
+        ])
+        && request.resource.data.keys().hasAll([
+          'type', 'status', 'uid', 'subject', 'createdAt', 'source'
+        ])
+        && request.resource.data.type == 'subject_suggestion'
+        && request.resource.data.status == 'open'
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.source == 'aceapp-web'
+        && shortString(request.resource.data.email, 180)
+        && shortString(request.resource.data.displayName, 120)
+        && shortString(request.resource.data.subject, 140)
+        && shortString(request.resource.data.suggestion, 300)
+        && shortString(request.resource.data.clientCreatedAt, 40)
+        && request.resource.data.createdAt == request.time;
+    }
+
     match /users/{userId} {
       function ownsRegisteredDocument() {
-        return request.auth != null
-          && request.auth.uid == userId
-          && request.auth.token.firebase.sign_in_provider != 'anonymous';
+        return isRegisteredUser() && request.auth.uid == userId;
       }
 
       function remainsRegistered() {
         return request.resource.data.accountType == 'registered';
       }
 
-      allow read: if ownsRegisteredDocument();
+      allow read: if ownsRegisteredDocument() || isAdmin();
       allow create, update: if ownsRegisteredDocument() && remainsRegistered();
       allow delete: if ownsRegisteredDocument();
+    }
+
+    // Admin membership is created manually in Firebase Console. Clients may
+    // read only their own marker and can never grant themselves admin access.
+    match /admins/{adminId} {
+      allow read: if isRegisteredUser() && request.auth.uid == adminId;
+      allow create, update, delete: if false;
+    }
+
+    // Registered users may submit tightly validated feedback only.
+    // They cannot read the collection or alter a report after submission.
+    // Approved admins may read/triage/delete feedback.
+    match /feedback/{feedbackId} {
+      allow create: if isRegisteredUser()
+        && (validAnnotationReport() || validSubjectSuggestion());
+
+      allow read, update, delete: if isAdmin();
     }
   }
 }
