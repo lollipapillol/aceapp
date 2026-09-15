@@ -103,16 +103,6 @@ html,body,#root{min-height:100%;height:100%}body{background:#fff;color:#111827}
 .ace-evidence-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-top:8px}.ace-evidence-strip.transfer{grid-template-columns:repeat(3,1fr);margin-top:5px}.ace-evidence-chip{padding:5px 3px;border-radius:8px;border:1px solid var(--ace-line);text-align:center;min-width:0}.ace-evidence-chip b{display:block;font-size:8px;line-height:1;color:var(--ace-muted)}.ace-evidence-chip span{display:block;margin-top:2px;font-size:5.8px;font-weight:850;letter-spacing:.03em;text-transform:uppercase;color:var(--ace-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ace-evidence-chip.pass{border-color:rgba(55,232,191,.16);background:rgba(55,232,191,.06)}.ace-evidence-chip.pass b,.ace-evidence-chip.pass span{color:#75efc6}.ace-light .ace-evidence-chip.pass b,.ace-light .ace-evidence-chip.pass span{color:#0f766e}.ace-evidence-chip.wait{border-color:rgba(255,200,90,.15);background:rgba(255,200,90,.05)}.ace-evidence-chip.wait b,.ace-evidence-chip.wait span{color:#ffd77f}.ace-light .ace-evidence-chip.wait b,.ace-light .ace-evidence-chip.wait span{color:#a16207}.ace-evidence-chip.na{opacity:.45}.ace-readiness-row-note{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:7px;font-size:6.8px;color:var(--ace-muted)}.ace-readiness-row-note strong{color:var(--ace-text);font-size:7px}.ace-readiness-legend{margin-top:9px;font-size:7px;line-height:1.5;color:var(--ace-muted)}
 
 </style>
-<script type="importmap">
-{
-  "imports": {
-    "react": "https://esm.sh/react@18.3.1",
-    "react/jsx-runtime": "https://esm.sh/react@18.3.1/jsx-runtime",
-    "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
-    "lucide-react": "https://esm.sh/lucide-react@0.383.0?external=react"
-  }
-}
-</script>
 </head>
 <body style="background:#071219;color:#e8f7f4">
 <!-- Netlify Forms: keep these static hidden forms so submissions are captured after deploy. -->
@@ -146,7 +136,7 @@ html,body,#root{min-height:100%;height:100%}body{background:#fff;color:#111827}
     var title=document.getElementById('ace-boot-title');
     var note=document.getElementById('ace-boot-note');
     if(title) title.textContent='Aceapp could not start';
-    if(note) note.textContent='Refresh once. If this remains, the latest deployment did not load correctly.';
+    if(note){ note.innerHTML='The newest app bundle did not finish loading.<br><button id="ace-boot-recover" style="margin-top:14px;padding:11px 14px;border:0;border-radius:12px;background:#2fe3df;color:#04242b;font-weight:800">Clear app cache & reload</button>'; var btn=document.getElementById('ace-boot-recover'); if(btn) btn.onclick=async function(){ try{ if('serviceWorker' in navigator){ var regs=await navigator.serviceWorker.getRegistrations(); await Promise.all(regs.map(function(r){return r.unregister();})); } if('caches' in window){ var keys=await caches.keys(); await Promise.all(keys.filter(function(k){return k.indexOf('aceapp-')===0;}).map(function(k){return caches.delete(k);})); } }catch(e){} var u=new URL(location.href); u.searchParams.set('fresh',Date.now().toString()); location.replace(u.toString()); }; }
   }
   window.addEventListener('error',startupIssue);
   window.addEventListener('unhandledrejection',startupIssue);
@@ -154,10 +144,10 @@ html,body,#root{min-height:100%;height:100%}body{background:#fff;color:#111827}
 })();
 </script>
 <script type="module">
-import { createRoot } from 'react-dom/client';
-import { jsxs as _jsxs, jsx as _jsx, Fragment as _Fragment } from "react/jsx-runtime";
-import { useState, useEffect, useMemo, useRef } from 'react';
-import { Heart, User, Home, Target, Check, X, Dumbbell, FlaskConical, Atom, Layers, RefreshCw, Microscope, Compass, Sparkles, Brain, Eye, Utensils, Wind, ShieldCheck, LoaderCircle, Moon, Sun, BookOpen, Map as MapIcon, BarChart3, Zap, Trophy, Search, LockKeyhole, Swords, ChevronRight, Cloud, CloudOff, Timer } from 'lucide-react';
+import { createRoot } from 'https://esm.unpkg.com/react-dom@18.3.1/client?deps=react@18.3.1';
+import { jsxs as _jsxs, jsx as _jsx, Fragment as _Fragment } from 'https://esm.unpkg.com/react@18.3.1/jsx-runtime';
+import { Component, useState, useEffect, useMemo, useRef } from 'https://esm.unpkg.com/react@18.3.1';
+import { Heart, User, Home, Target, Check, X, Dumbbell, FlaskConical, Atom, Layers, RefreshCw, Microscope, Compass, Sparkles, Brain, Eye, Utensils, Wind, ShieldCheck, LoaderCircle, Moon, Sun, BookOpen, Map as MapIcon, BarChart3, Zap, Trophy, Search, LockKeyhole, Swords, ChevronRight, Cloud, CloudOff, Timer } from 'https://esm.unpkg.com/lucide-react@0.383.0?deps=react@18.3.1';
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js';
 import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js';
 import { getFirestore, doc, getDoc, setDoc, serverTimestamp, collection, getDocs, query, orderBy, updateDoc } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js';
@@ -178,7 +168,7 @@ const firebaseDb = getFirestore(firebaseApp);
 const FIREBASE_USERS = 'users';
 const FIREBASE_ADMINS = 'admins';
 const FIREBASE_FEEDBACK = 'feedback';
-const ACEAPP_RELEASE = 'v49';
+const ACEAPP_RELEASE = 'v50';
 let firebasePatchTimer = null;
 let pendingFirebasePatch = {};
 let pendingFirebaseUid = '';
@@ -3436,6 +3426,46 @@ const ANNOTATION_REPORT_REASONS = [
 ];
 const annotationReasonLabel = (reason) => ANNOTATION_REPORT_REASONS.find(([id]) => id === reason)?.[1] || 'Unspecified issue';
 
+
+class AceappErrorBoundary extends Component {
+    constructor(props) {
+        super(props);
+        this.state = { error: null };
+    }
+    static getDerivedStateFromError(error) { return { error }; }
+    componentDidCatch(error, info) {
+        console.error('Aceapp render failure', error, info);
+    }
+    async clearRuntimeCache() {
+        try {
+            if ('serviceWorker' in navigator) {
+                const regs = await navigator.serviceWorker.getRegistrations();
+                await Promise.all(regs.map((r) => r.unregister()));
+            }
+            if ('caches' in window) {
+                const keys = await caches.keys();
+                await Promise.all(keys.filter((k) => k.startsWith('aceapp-')).map((k) => caches.delete(k)));
+            }
+        } catch (err) { console.warn('Cache reset deferred', err); }
+        const u = new URL(location.href);
+        u.searchParams.set('fresh', Date.now().toString());
+        location.replace(u.toString());
+    }
+    render() {
+        if (!this.state.error) return this.props.children;
+        const msg = String(this.state.error?.message || this.state.error || 'Unknown startup error');
+        return _jsx('div', { style: { minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', padding:'24px', background:'#071219', color:'#e8f7f4', fontFamily:'ui-sans-serif,system-ui,sans-serif' }, children:
+            _jsxs('div', { style:{ maxWidth:'430px', width:'100%', padding:'22px', border:'1px solid rgba(47,227,223,.2)', borderRadius:'22px', background:'#0b202b' }, children:[
+                _jsx('div', { style:{ fontSize:'12px', fontWeight:900, letterSpacing:'.12em', color:'#2fe3df' }, children:'ACEAPP STARTUP RECOVERY' }),
+                _jsx('h1', { style:{ margin:'8px 0 6px', fontSize:'23px', fontWeight:850 }, children:'The app hit a startup error.' }),
+                _jsx('p', { style:{ margin:'0 0 14px', color:'#9bb3bd', lineHeight:1.55, fontSize:'14px' }, children:'Your saved progress has not been deleted. Clear only the app runtime cache and reload the newest deployment.' }),
+                _jsx('button', { type:'button', onClick:()=>this.clearRuntimeCache(), style:{ width:'100%', padding:'13px 14px', borderRadius:'14px', border:'0', background:'#2fe3df', color:'#04242b', fontWeight:850 }, children:'Clear app cache & reload' }),
+                _jsx('details', { style:{ marginTop:'14px', color:'#86a0ad', fontSize:'12px' }, children:_jsxs(_Fragment,{children:[_jsx('summary',{children:'Technical detail'}),_jsx('pre',{style:{whiteSpace:'pre-wrap',wordBreak:'break-word',marginTop:'8px'},children:msg})]}) })
+            ] })
+        });
+    }
+}
+
 export default function Aceapp() {
     const [screen, setScreen] = useState('home');
     const [loaded, setLoaded] = useState(false);
@@ -3688,7 +3718,7 @@ export default function Aceapp() {
         const onInstall = (event) => { event.preventDefault(); setInstallPrompt(event); };
         window.addEventListener('beforeinstallprompt', onInstall);
         if ('serviceWorker' in navigator)
-            navigator.serviceWorker.register('./sw.js?v=49-readiness-matrix').catch(() => { });
+            navigator.serviceWorker.register('./sw.js?v=50-startup-hotfix').catch(() => { });
         return () => window.removeEventListener('beforeinstallprompt', onInstall);
     }, []);
     useEffect(() => {
@@ -4994,16 +5024,17 @@ export default function Aceapp() {
         return { introduced: introduced.length, due, repair, gaps, count: Math.min(9, actionable), actionable };
     })();
     function evidenceForItem(item) {
-        const core = examReadinessFor(item.key, mastered, skills);
-        const contexts = Array.isArray(skills[item.key]?.contexts) ? skills[item.key].contexts : [];
-        const cueEligible = isLocatableItem(item);
+        const core = examReadinessFor(item.key, mastered || {}, skills || {});
+        const skill = (skills && skills[item.key] && typeof skills[item.key] === 'object') ? skills[item.key] : {};
+        const contexts = Array.isArray(skill.contexts) ? skill.contexts : [];
+        const cueEligible = (() => { try { return isLocatableItem(item); } catch { return false; } })();
         const cueFree = contexts.includes('cuefade:independent');
-        const viewEligible = viewVariantsFor(item).length >= 2;
+        const viewEligible = (() => { try { return viewVariantsFor(item).length >= 2; } catch { return false; } })();
         const viewCount = new Set(contexts.filter((ctx) => ctx && !String(ctx).includes(':'))).size;
         const viewGeneralized = viewCount >= 2;
-        const cropEligible = isCropChallengeEligibleItem(item);
-        const cropRobust = Boolean(skills[item.key]?.cropTight);
-        const due = Boolean(reviews[item.key]?.due && reviews[item.key].due <= dayKey());
+        const cropEligible = (() => { try { return isCropChallengeEligibleItem(item); } catch { return false; } })();
+        const cropRobust = Boolean(skill.cropTight);
+        const due = Boolean(reviews?.[item.key]?.due && reviews[item.key].due <= dayKey());
         return { ...core, cueEligible, cueFree, viewEligible, viewGeneralized, cropEligible, cropRobust, due };
     }
     function prescriptionForItem(item) {
@@ -6564,7 +6595,7 @@ export default function Aceapp() {
     return (Shell({ children: _jsxs("div", { className: "ace-standard-page", children: [_jsx("p", { className: "text-sm text-gray-500 mb-3", children: "Nothing to show." }), _jsx("button", { onClick: () => setScreen('home'), className: "w-full py-3 rounded-2xl bg-teal-600 text-white font-medium", children: "Home" })] }) }));
 }
 
-createRoot(document.getElementById('root')).render(_jsx(Aceapp, {}));
+createRoot(document.getElementById('root')).render(_jsx(AceappErrorBoundary, { children: _jsx(Aceapp, {}) }));
 </script>
 </body>
 </html>

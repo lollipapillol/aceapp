@@ -1,4 +1,4 @@
-const CACHE = 'aceapp-v49-readiness-matrix-20260915';
+const CACHE = 'aceapp-v50-startup-hotfix-20260915';
 const APP_SHELL = ['/', '/manifest.webmanifest'];
 
 self.addEventListener('install', (event) => {

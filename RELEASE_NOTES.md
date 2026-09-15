@@ -37,3 +37,11 @@ No Firestore rule change is required for v49. The Readiness Matrix is derived fr
 
 ## Cache
 The service-worker cache key and registration query were bumped to v49.
+
+
+## v50 startup hotfix
+- Replaced the React/lucide import-map path with direct version-pinned browser ESM imports.
+- Added a React error boundary so runtime failures show a recovery screen instead of a blank page.
+- Added one-tap service-worker/cache recovery that preserves local learning progress.
+- Hardened readiness-matrix evidence checks against malformed legacy local state.
+- No anatomy data or plate artwork changed.
